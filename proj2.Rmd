@@ -117,7 +117,13 @@ rmse_ibcf
 
 # summary of findings and recommendations
 
-Reference:
+Compare the RMSEs of content based model, user-user based model, and item-item based model, they are 0.9578232, 0.985047, 1.032426 respectively, which show that the model accuarcy is from high to low from content based model to user-user based model to item-item based model. This result seems conflicts with gereral performance of these three models, the performance normally is opposite of the hige to low order of the current results: item-item based is highest, and the content based is lowest.
+
+I would consider to rerun the model for at least 10 times to get a more stable result.
+
+# Reference:
+
+Building a Recommendation System with R by Suresh K. Gorakala, Michele Usuelli
 
 https://rpubs.com/tarashnot/recommender_comparison
 
