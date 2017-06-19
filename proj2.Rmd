@@ -1,0 +1,78 @@
+---
+title: "Project 2 - Data 643"
+author: "Ann Liu-Ferrara"
+date: "June 12, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Content-Based and Collaborative Filtering
+
+Using data ratings from library SVDApproximation, there are 1M ratings with 6040 users and 3706 movies. The ratings are 1-5 (stars).
+
+```{r}
+library(recommenderlab)
+library(SVDApproximation)
+library(devtools)
+install_github(repo = "SVDApproximation", username = "tarashnot")
+library(SVDApproximation)
+
+dim(ratings)
+head(ratings)
+summary(ratings)
+visualize_ratings(ratings_table = ratings)
+
+
+```
+
+# Content-Based
+
+
+
+```{r}
+# computer item average as missing value
+sparse_ratings <- sparseMatrix(i = ratings$user, j = ratings$item, x = ratings$rating, 
+                               dims = c(length(unique(ratings$user)), length(unique(ratings$item))),  
+                               dimnames = list(paste("u", 1:length(unique(ratings$user)), sep = ""), 
+                                               paste("m", 1:length(unique(ratings$item)), sep = "")))
+sparse_ratings[1:10, 1:10]
+
+(real_ratings <- new("realRatingMatrix", data = sparse_ratings))
+
+
+# create a Recommender model
+model <- Recommender(real_ratings, method = "POPULAR", param=list(normalize = "center"))
+
+# prediction of ratings
+prediction <- predict(model, real_ratings[1:5], type="ratings")
+(as(prediction, "matrix")[,1:5])
+
+
+
+```
+
+# Collaborative Filtering - User-User Collaborative Filtering
+
+
+```{r}
+
+```
+
+# Collaborative Filtering - Item-Item Collaborative Filtering
+
+
+
+```{r}
+
+```
+
+# summary of findings and recommendations
+
+Reference:
+
+https://rpubs.com/tarashnot/recommender_comparison
+
+
