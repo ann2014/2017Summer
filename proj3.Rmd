@@ -56,6 +56,8 @@ rmse_svd
 # Alternating Least Squares (ALS)
 
 ```{r}
+
+data(MovieLense)
 als <- Recommender(data = MovieLense[1:500,], method = "ALS", 
                  parameter = list(normalize=NULL, lambda=0.1, n_factors=10, 
                                   n_iterations=10, seed = NULL, verbose = FALSE)) 
@@ -176,14 +178,11 @@ rmse_slopeone
 
 # Summary of findings and recommendations
 
-Summary of findings and recommendations
-Compare the RMSEs of content based model, user-user based model, and item-item based model, they are 0.9578232, 0.985047, 1.032426 respectively. The results show that the model accuracy from high to low is content based model, user-user based model, item-item based model. Generally speaking, the highest performance of these three models is item-item based model, and the content based is the lowest. It looks a conflict of the results with the general model performance.
-I would consider to rerun the model at least 10 times to get a more accurate result.
-
+I learned more recommender system algorithms in this project: SVD, ALS, Slope One, and Matrix Factorization with GD, some results of the models were compared.  
 
 # Reference:
 
-Building a Recommendation System with R by Suresh K. Gorakala, Michele Usuelli
+http://www.infofarm.be/articles/alternating-least-squares-algorithm-recommenderlab
 
 https://rpubs.com/tarashnot/recommender_comparison
 
