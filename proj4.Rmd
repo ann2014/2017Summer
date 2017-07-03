@@ -1,0 +1,74 @@
+---
+title: "Projec 4 - Data 643"
+author: "Ann Liu-Ferrara"
+date: "June 30, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Accuracy and Beyond
+
+1. Compare the accuracy of at least two recommender system algorithms against your offline data.
+2. Implement support for at least one business or user experience goal such as increased serendipity, novelty, or diversity.
+3. Compare and report on any change in accuracy before and after you've made the change in #2.
+4. As part of your textual conclusion, discuss one or more additional experiments that could be performed and/or metrics that could be evaluated only if online evaluation was possible. Also, briefly propose how you would design a reasonable online evaluation environment.
+
+```{r}
+library(recommenderlab)
+library(ggplot2)
+data("MovieLense")
+
+# data selection 
+(ratings_movies <- MovieLense[rowCounts(MovieLense) > 50, colCounts(MovieLense) > 100])
+
+# split data
+precentage_training <- .8
+
+# setting parameters
+# check the minimum # of items purchased by user 
+# so there will not be any users without items to test the models
+min(rowCounts(ratings_movies))
+items_to_keep <- 15
+
+# minimum rating that is considered good
+rating_threshold <- 3
+# # of run the evaluation
+n_eval <- 1
+
+eval_sets <- evaluationScheme(
+                data = ratings_movies,
+                method = 'split',
+                train = precentage_training, 
+                given = items_to_keep,
+                goodRating = rating_threshold,
+                k = n_eval
+             )
+
+eval_sets
+
+getData(eval_sets, 'train')
+(nrow(getData(eval_sets, 'train'))/nrow(ratings_movies))
+getData(eval_sets, 'known')
+getData(eval_sets, 'unknown')
+nrow(getData(eval_sets, 'known'))/nrow(ratings_movies)
+unique(rowCounts(getData(eval_sets, 'known')))
+qplot(rowCounts(getData(eval_sets, 'unknown'))) + 
+  geom_histogram(binwidth = 10) +
+  ggtitle('Unknown items by the users')
+
+# k-fold tests on each user
+n_fold <- 4
+eval_sets <- evaluationScheme(
+  data = ratings_movies, 
+  method = 'cross-validation',
+  k = n_fold,
+  given = items_to_keep,
+  goodRating = rating_threshold)
+size_sets <- sapply(eval_sets@runsTrain, length)
+size_sets
+
+
+```
