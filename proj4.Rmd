@@ -89,18 +89,15 @@ eval_prediction <- predict(object = eval_recommender,
 
 class(eval_prediction)
 
-## ----warning=FALSE-------------------------------------------------------
+## Distribution of movies per user
 qplot(rowCounts(eval_prediction)) +
   geom_histogram(binwidth = 10) +
   ggtitle("Distribution of movies per user")
 
-## ------------------------------------------------------------------------
 eval_accuracy <- calcPredictionAccuracy(
   x = eval_prediction,
   data = getData(eval_sets, "unknown"),
   byUser = TRUE)
-
-head(eval_accuracy)
 
 pander(head(eval_accuracy))
 
@@ -142,24 +139,14 @@ models_to_evaluate <- list(
 )
 
 n_recommendations <- c(1, 5, seq(10, 100, 10))
-
-## 
 list_results <- evaluate(x = eval_sets,
                     method = models_to_evaluate,
                     n = n_recommendations)
 class(list_results)
 class(list_results[[1]])
 
-## 
 sapply(list_results, class) == "evaluationResults"
-
-## 
 avg_matrices <- lapply(list_results, avg)
-
-## 
-head(avg_matrices$IBCF_cos[, 5:8])
-
-##
 pander(head(avg_matrices$IBCF_cos)[, 5:8])
 
 ## compare the results of different models
@@ -168,17 +155,13 @@ plot(list_results,
      legend = "topleft")
 title("ROC curve")
 
-## 
 plot(list_results,
      "prec/rec",
      annotate = 1,
      legend = "bottomright")
 title("Precision-recall")
 
-## 
 vector_k <- c(5, 10, 20, 30, 40)
-
-## 
 models_to_evaluate <- lapply(vector_k, function(k){
   list(name = "IBCF",
        param = list(method = "cosine",
@@ -192,16 +175,26 @@ list_results <- evaluate(x = eval_sets,
                          method = models_to_evaluate,
                          n = n_recommendations)
 
-##
+## topleft
 plot(list_results,
      annotate = 1,
      legend = "topleft")
 title("ROC curve")
 
-## 
+## bottomright
 plot(list_results,
      "prec/rec",
      annotate = 1,
      legend = "bottomright")
 title("Precision-recall")
+
 ```
+
+## Conclusion:
+
+I ran the example code in Chapter 4 of the text 'Building a Recommendation System with R', and tried to get familiar with model evaluation and comparison.
+
+## Reference:
+
+Gorakala, S. and Usuelli, M. (2015). Building a Recommendation System with R.
+
