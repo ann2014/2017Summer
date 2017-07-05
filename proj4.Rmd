@@ -20,6 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(recommenderlab)
 library(ggplot2)
 data("MovieLense")
+library(pander)
 
 # data selection 
 (ratings_movies <- MovieLense[rowCounts(MovieLense) > 50, colCounts(MovieLense) > 100])
@@ -70,5 +71,137 @@ eval_sets <- evaluationScheme(
 size_sets <- sapply(eval_sets@runsTrain, length)
 size_sets
 
+model_to_evaluate <- "IBCF"
+model_parameters <- NULL
 
+## build model
+eval_recommender <- Recommender(data = getData(eval_sets, "train"),
+                                method = model_to_evaluate,
+                                parameter = model_parameters)
+
+items_to_recommend <- 10
+
+## predict
+eval_prediction <- predict(object = eval_recommender,
+                           newdata = getData(eval_sets, "known"),
+                           n = items_to_recommend,
+                           type = "ratings")
+
+class(eval_prediction)
+
+## ----warning=FALSE-------------------------------------------------------
+qplot(rowCounts(eval_prediction)) +
+  geom_histogram(binwidth = 10) +
+  ggtitle("Distribution of movies per user")
+
+## ------------------------------------------------------------------------
+eval_accuracy <- calcPredictionAccuracy(
+  x = eval_prediction,
+  data = getData(eval_sets, "unknown"),
+  byUser = TRUE)
+
+head(eval_accuracy)
+
+pander(head(eval_accuracy))
+
+qplot(eval_accuracy[, "RMSE"]) +
+  geom_histogram(binwidth = 0.1) +
+  ggtitle("Distribution of the RMSE by user")
+
+eval_accuracy <- calcPredictionAccuracy(
+  x = eval_prediction,
+  data = getData(eval_sets, "unknown"),
+  byUser = FALSE)
+eval_accuracy
+
+results <- evaluate(x = eval_sets,
+                    method = model_to_evaluate,
+                    n = seq(10, 100, 10))
+class(results)
+head(getConfusionMatrix(results)[[1]])
+
+pander(head(getConfusionMatrix(results)[[1]]))
+columns_to_sum <- c("TP", "FP", "FN", "TN")
+indices_summed <- Reduce("+", getConfusionMatrix(results))[, columns_to_sum]
+head(indices_summed)
+pander(head(indices_summed))
+plot(results,
+     annotate = TRUE,
+     main = "ROC curve")
+
+plot(results, "prec/rec",
+     annotate = TRUE,
+     main = "Precision-recall")
+
+models_to_evaluate <- list(
+  IBCF_cos = list(name = "IBCF", param = list(method = "cosine")),
+  IBCF_cor = list(name = "IBCF", param = list(method = "pearson")),
+  UBCF_cos = list(name = "UBCF", param = list(method = "cosine")),
+  UBCF_cor = list(name = "UBCF", param = list(method = "pearson")),
+  random = list(name = "RANDOM", param=NULL)
+)
+
+n_recommendations <- c(1, 5, seq(10, 100, 10))
+
+## 
+list_results <- evaluate(x = eval_sets,
+                    method = models_to_evaluate,
+                    n = n_recommendations)
+class(list_results)
+class(list_results[[1]])
+
+## 
+sapply(list_results, class) == "evaluationResults"
+
+## 
+avg_matrices <- lapply(list_results, avg)
+
+## 
+head(avg_matrices$IBCF_cos[, 5:8])
+
+##
+pander(head(avg_matrices$IBCF_cos)[, 5:8])
+
+## compare the results of different models
+plot(list_results,
+     annotate = 1,
+     legend = "topleft")
+title("ROC curve")
+
+## 
+plot(list_results,
+     "prec/rec",
+     annotate = 1,
+     legend = "bottomright")
+title("Precision-recall")
+
+## 
+vector_k <- c(5, 10, 20, 30, 40)
+
+## 
+models_to_evaluate <- lapply(vector_k, function(k){
+  list(name = "IBCF",
+       param = list(method = "cosine",
+                    k = k))
+})
+names(models_to_evaluate) <- paste0("IBCF_k_", vector_k)
+
+## 
+n_recommendations <- c(1, 5, seq(10, 100, 10))
+list_results <- evaluate(x = eval_sets,
+                         method = models_to_evaluate,
+                         n = n_recommendations)
+
+##
+plot(list_results,
+     annotate = 1,
+     legend = "topleft")
+title("ROC curve")
+
+## 
+plot(list_results,
+     "prec/rec",
+     annotate = 1,
+     legend = "bottomright")
+title("Precision-recall")
 ```
